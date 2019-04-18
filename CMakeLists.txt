@@ -1,14 +1,12 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 3.9)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.13)
 
 SET (CMAKE_CXX_STANDARD 17)
 
 PROJECT ("YUNIKENGINE")
 
-SET (YUNIKENGINE_TARGET yunikEngine)
-
 ############################ Compile options ###################################
 
-OPTION (YUNIKENGINE_BUILD_TESTS "Build the test programs" OFF)
+OPTION (YUNIKENGINE_BUILD_TESTS "Build the test programs" ON)
 
 ############################## SUBMODULES ######################################
 
@@ -37,12 +35,12 @@ INCLUDE_DIRECTORIES (${YUNIKENGINE_SUBMODULES_DIR}/glew/include)
 # stb
 INCLUDE_DIRECTORIES (${YUNIKENGINE_SUBMODULES_DIR}/stb)
 
-################################################################################
+########################### Generate Library ###################################
 
-ADD_SUBDIRECTORY (yunikEngine EXCLUDE_FROM_ALL)
+ADD_SUBDIRECTORY (include/yunikEngine)
 
-TARGET_LINK_LIBRARIES (${YUNIKENGINE_TARGET}
-    ${OPENGL_LIBRARIES}
-    glfw
-    glew_s
-)
+############################## Build Test ######################################
+
+IF (YUNIKENGINE_BUILD_TESTS)
+    ADD_SUBDIRECTORY (tests)
+ENDIF ()
