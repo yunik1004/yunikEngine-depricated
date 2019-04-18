@@ -6,6 +6,10 @@ PROJECT ("YUNIKENGINE")
 
 SET (YUNIKENGINE_TARGET yunikEngine)
 
+############################ Compile options ###################################
+
+OPTION (YUNIKENGINE_BUILD_TESTS "Build the test programs" OFF)
+
 ############################## SUBMODULES ######################################
 
 SET (YUNIKENGINE_SUBMODULES_DIR ${PROJECT_SOURCE_DIR}/submodules)
