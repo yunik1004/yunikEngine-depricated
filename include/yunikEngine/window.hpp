@@ -1,59 +1,56 @@
 #pragma once
 
-#include <iostream>
-#include <sstream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "projectManager.hpp"
+#include "scene.hpp"
 
 namespace yunikEngine {
     class Window {
         /***************************** PUBLIC *********************************/
         public:
-        static Window* getInstance (void) {
-            if (instance == nullptr) {
-                instance = new Window();
+        static Window* create (void) {
+            auto newWindow = new Window();
+            if (!newWindow->isValid) {
+                delete newWindow;
+                return nullptr;
             }
-            return instance;
+            return newWindow;
         }
 
-        static void purgeInstance (void) {
-            delete instance;
+        ~Window (void) {
+            if (window != nullptr) {
+                glfwDestroyWindow(window);
+            }
+            delete scene;
         }
 
-        static void setOpenGLVersion (int major, int minor) {
-            opengl_version_major = major;
-            opengl_version_minor = minor;
+        void setScene (Scene* newScene) {
+            if (scene != nullptr) {
+                delete scene;
+            }
+            scene = newScene;
+        }
+
+        void render (void) {
+            while (!glfwWindowShouldClose(window)) {
+                updateScene();
+                glfwSwapBuffers(window);
+                glfwPollEvents();
+            }
         }
 
         /**************************** PRIVATE *********************************/
         private:
         Window (void) {
-            /* Initialize glfw */
-            glfwSetErrorCallback([](int errorCode, const char* errorDescription) {
-                std::cerr << "GLFW Error: " << errorDescription << std::endl;
-            });
-
-            if (!glfwInit()) {
-                std::cerr << "GLFW Error: Fail to initialize" << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            /* OpenGL version */
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, opengl_version_major);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, opengl_version_minor);
-
-            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
             /* Anti-aliasing */
             glfwWindowHint(GLFW_SAMPLES, 4);
-
+            
             /* Create window */
             window = glfwCreateWindow(1024, 768, "Hello world", nullptr, nullptr);
             if (window == nullptr) {
-                glfwTerminate();
-                exit(EXIT_FAILURE);
+                fprintf(stderr, "GLFW Error: Failed to create window\n");
+                return;
             }
 
             glfwMakeContextCurrent(window);
@@ -64,46 +61,44 @@ namespace yunikEngine {
             /* Initialize glew */
             GLenum errorCode = glewInit();
             if (errorCode != GLEW_OK) {
-                std::cerr << "GLEW Error: Fail to initialize. " << glewGetErrorString(errorCode) << std::endl;
+                fprintf(stderr, "GLEW Error: Failed to initialize. %s\n", glewGetErrorString(errorCode));
                 glfwDestroyWindow(window);
-                glfwTerminate();
-                exit(EXIT_FAILURE);
+                return;
             }
 
             /* OpenGL version check */
-            std::stringstream gl_version;
-            gl_version << "GL_VERSION_" << opengl_version_major << "_" << opengl_version_minor;
-            const char* gl_version_char = gl_version.str().c_str();
-            if (!glewIsSupported(gl_version_char)) {
-                std::cerr << gl_version_char << " is not avaliable." << std::endl;
+            int gl_major, gl_minor;
+            ProjectManager::getGLVersion(gl_major, gl_minor);
+            char gl_version[15];
+            sprintf(gl_version, "GL_VERSION_%d_%d", gl_major, gl_minor);
+            if (!glewIsSupported(gl_version)) {
+                fprintf(stderr, "OpenGL Error: %s is not available\n", gl_version);
                 glfwDestroyWindow(window);
-                glfwTerminate();
-                exit(EXIT_FAILURE);
+                return;
             }
 
             /* Set OpenGL options */
             glEnable(GL_CULL_FACE);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            isValid = true;
         }
 
-        ~Window (void) {
-            if (window != nullptr) {
-                glfwDestroyWindow(window);
+        void updateScene (void) {
+            if (scene == nullptr) {
+                return;
             }
-            
-            glfwTerminate();
+            Scene* nextScene = scene->update();
+            if (nextScene != scene) {
+                delete scene;
+                scene = nextScene;
+            }
         }
 
-        static Window* instance;
-        static int opengl_version_major;
-        static int opengl_version_minor;
+        GLFWwindow* window = nullptr;
+        Scene* scene = nullptr;
 
-        GLFWwindow* window;
+        bool isValid = false;
     };
-
-    /************************** INITIALIZATION ********************************/
-    Window* Window::instance = nullptr;
-    int Window::opengl_version_major = 4;
-    int Window::opengl_version_minor = 4;
 }

@@ -1,8 +1,13 @@
 #include <iostream>
+#include <yunikEngine/projectManager.hpp>
 #include <yunikEngine/window.hpp>
 
 int main (void) {
-    std::cout << "hello" << std::endl;
-    auto window = yunikEngine::Window::getInstance();
+    yunikEngine::ProjectManager::init();
+
+    auto w = yunikEngine::Window::create();
+    w->render();
+
+    yunikEngine::ProjectManager::deinit();
     return 0;
 }
