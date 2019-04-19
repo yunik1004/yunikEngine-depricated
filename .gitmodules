@@ -7,3 +7,6 @@
 [submodule "submodules/stb"]
 	path = submodules/stb
 	url = https://github.com/nothings/stb.git
+[submodule "submodules/openal"]
+	path = submodules/openal
+	url = https://github.com/kcat/openal-soft.git

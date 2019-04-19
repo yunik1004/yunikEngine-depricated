@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "math.hpp"
 #include "projectManager.hpp"
 #include "scene.hpp"
 
@@ -77,7 +78,9 @@ namespace yunikEngine {
 
             int monitor_width, monitor_height;
             ProjectManager::getMonitorSize(&monitor_width, &monitor_height);
-            setPos((monitor_width - default_window_width) / 2.0, (monitor_height - default_window_height) / 2.0);
+			const auto window_width_diff = monitor_width - default_window_width;
+			const auto window_height_diff = monitor_height - default_window_height;
+            setPos(round(window_width_diff / 2.0), round(window_height_diff / 2.0));
 
             glfwMakeContextCurrent(window);
 
