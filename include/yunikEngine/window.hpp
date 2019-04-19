@@ -25,6 +25,22 @@ namespace yunikEngine {
             delete scene;
         }
 
+        void setTitle (const char* title) {
+            glfwSetWindowTitle(window, title);
+        }
+
+        void setSize (int width, int height) {
+            glfwSetWindowSize(window, width, height);
+        }
+
+        void setPos (int xpos, int ypos) {
+            glfwSetWindowPos(window, xpos, ypos);
+        }
+
+        void setResizability (bool isResizable) {
+            glfwSetWindowAttrib(window, GLFW_RESIZABLE, isResizable);
+        }
+
         void setScene (Scene* newScene) {
             if (scene != nullptr) {
                 delete scene;
@@ -45,13 +61,23 @@ namespace yunikEngine {
         Window (void) {
             /* Anti-aliasing */
             glfwWindowHint(GLFW_SAMPLES, 4);
-            
+
             /* Create window */
-            window = glfwCreateWindow(1024, 768, "Hello world", nullptr, nullptr);
+            int default_window_width = 1024;
+            int default_window_height = 768;
+
+            window = glfwCreateWindow(default_window_width, default_window_height, "Hello world", nullptr, nullptr);
             if (window == nullptr) {
                 fprintf(stderr, "GLFW Error: Failed to create window\n");
                 return;
             }
+
+            /* Resizability */
+            setResizability(false);
+
+            int monitor_width, monitor_height;
+            ProjectManager::getMonitorSize(&monitor_width, &monitor_height);
+            setPos((monitor_width - default_window_width) / 2.0, (monitor_height - default_window_height) / 2.0);
 
             glfwMakeContextCurrent(window);
 
@@ -68,8 +94,8 @@ namespace yunikEngine {
 
             /* OpenGL version check */
             int gl_major, gl_minor;
-            ProjectManager::getGLVersion(gl_major, gl_minor);
-            char gl_version[15];
+            ProjectManager::getGLVersion(&gl_major, &gl_minor);
+            char gl_version[17];
             sprintf(gl_version, "GL_VERSION_%d_%d", gl_major, gl_minor);
             if (!glewIsSupported(gl_version)) {
                 fprintf(stderr, "OpenGL Error: %s is not available\n", gl_version);

@@ -12,9 +12,9 @@ namespace yunikEngine {
             opengl_version_minor = minor;
         }
 
-        static void getGLVersion (int& major, int& minor) {
-            major = opengl_version_major;
-            minor = opengl_version_minor;
+        static void getGLVersion (int* major, int* minor) {
+            *major = opengl_version_major;
+            *minor = opengl_version_minor;
         }
 
         static bool init (void) {
@@ -51,6 +51,12 @@ namespace yunikEngine {
 
         static void purgeInstance (void) {
             delete instance;
+        }
+
+        static void getMonitorSize (int* width, int* height) {
+            auto mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            *width = mode->width;
+            *height = mode->height;
         }
 
         /**************************** PRIVATE *********************************/
