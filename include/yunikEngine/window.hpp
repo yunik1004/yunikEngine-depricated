@@ -61,11 +61,8 @@ namespace yunikEngine {
             return newWindow;
         }
 
-        ~Window (void) {
-            if (window != nullptr) {
-                glfwDestroyWindow(window);
-            }
-            delete scene;
+        void destroy (void) {
+            delete this;
         }
 
         void setTitle (const char* title) {
@@ -119,7 +116,7 @@ namespace yunikEngine {
             setResizability(false);
 
             int monitor_width, monitor_height;
-            ProjectManager::getMonitorSize(&monitor_width, &monitor_height);
+            getMonitorSize(&monitor_width, &monitor_height);
 			const auto window_width_diff = monitor_width - default_window_width;
 			const auto window_height_diff = monitor_height - default_window_height;
             setPos(round(window_width_diff / 2.0), round(window_height_diff / 2.0));
@@ -139,7 +136,7 @@ namespace yunikEngine {
 
             /* OpenGL version check */
             int gl_major, gl_minor;
-            ProjectManager::getGLVersion(&gl_major, &gl_minor);
+            getGLVersion(&gl_major, &gl_minor);
             char gl_version[17];
             sprintf(gl_version, "GL_VERSION_%d_%d", gl_major, gl_minor);
             if (!glewIsSupported(gl_version)) {
@@ -154,6 +151,13 @@ namespace yunikEngine {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             isValid = true;
+        }
+
+        ~Window (void) {
+            if (window != nullptr) {
+                glfwDestroyWindow(window);
+            }
+            delete scene;
         }
 
         void updateScene (void) {

@@ -11,7 +11,10 @@ namespace yunikEngine {
             if (!Window::init()) {
                 return false;
             }
-            Audio::init();
+            if (!Audio::init()) {
+                Window::deinit();
+                return false;
+            }
             return true;
         }
 
