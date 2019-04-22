@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdio>
-#include <cmath>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "math.hpp"
@@ -206,12 +205,13 @@ namespace yunikEngine {
                 GLfloat widthFactor = (GLfloat)w / (GLfloat)windowObj->default_window_width;
                 GLfloat heightFactor = (GLfloat)h / (GLfloat)windowObj->default_window_height;
 
-                GLfloat sizeFactor = widthFactor < heightFactor ? widthFactor : heightFactor;
-
-                GLint modifiedWidth =  (int) ceil(windowObj->default_window_width * sizeFactor) + 1;
-                GLint modifiedHeight = (int) ceil(windowObj->default_window_height * sizeFactor) + 1;
-
-                glViewport((int)floor((w - modifiedWidth) / 2.0), (int)floor((h - modifiedHeight) / 2.0), modifiedWidth, modifiedHeight);
+                if (widthFactor < heightFactor) {
+                    GLint modifiedHeight = round(windowObj->default_window_height * widthFactor);
+                    glViewport(0, round((h - modifiedHeight) / 2.0), w, modifiedHeight);
+                } else {
+                    GLint modifiedWidth =  round(windowObj->default_window_width * heightFactor);
+                    glViewport(round((w - modifiedWidth) / 2.0), 0, modifiedWidth, h);
+                }
             }
         }
 
