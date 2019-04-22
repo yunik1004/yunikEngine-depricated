@@ -199,7 +199,7 @@ namespace yunikEngine {
         }
 
         static void windowSizeCallback (GLFWwindow* window, int w, int h) {
-            Window* windowObj = glfwGetWindowUserPointer(window);
+            Window* windowObj = (Window*) glfwGetWindowUserPointer(window);
             if (windowObj->isViewportFull) {
                 glViewport(0, 0, w, h);
             } else {
