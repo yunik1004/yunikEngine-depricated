@@ -58,7 +58,7 @@ namespace yunikEngine {
         static Window* create (void) {
             auto newWindow = new Window();
             if (!newWindow->isValid) {
-                delete newWindow;
+                newWindow->destroy();
                 return nullptr;
             }
             return newWindow;

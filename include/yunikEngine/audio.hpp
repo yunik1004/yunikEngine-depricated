@@ -86,7 +86,7 @@ namespace yunikEngine {
         static Audio* create (void) {
             auto newAudio = new Audio();
             if (!newAudio->isValid) {
-                delete newAudio;
+                newAudio->destroy();
                 return nullptr;
             }
             return newAudio;
