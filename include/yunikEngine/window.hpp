@@ -99,12 +99,9 @@ namespace yunikEngine {
             glfwSetWindowAspectRatio(window, GLFW_DONT_CARE, GLFW_DONT_CARE);
         }
 
-        void setViewportFullWindow (bool isViewportFull) {
-            if (isViewportFull) {
-                glfwSetWindowSizeCallback(window, &windowSizeCallback_ViewportFull);
-            } else {
-                glfwSetWindowSizeCallback(window, &windowSizeCallback_ViewportNotFull);
-            }
+        void setViewportFullWindow (bool isFull) {
+            isViewportFull = isFull;
+            glfwSetWindowSizeCallback(window, &windowSizeCallback);
         }
 
         void setScene (Scene* newScene) {
@@ -141,11 +138,14 @@ namespace yunikEngine {
             /* Set window position */
             int monitor_width, monitor_height;
             getMonitorSize(&monitor_width, &monitor_height);
-			const auto window_width_diff = monitor_width - default_window_width;
-			const auto window_height_diff = monitor_height - default_window_height;
+			const int window_width_diff = monitor_width - default_window_width;
+			const int window_height_diff = monitor_height - default_window_height;
             setPos(round(window_width_diff / 2.0), round(window_height_diff / 2.0));
 
             glfwMakeContextCurrent(window);
+
+            /* Save info about window */
+            glfwSetWindowUserPointer(window, this);
 
             /* FPS limit: 60 */
             glfwSwapInterval(1);
@@ -198,20 +198,21 @@ namespace yunikEngine {
             }
         }
 
-        static void windowSizeCallback_ViewportFull (GLFWwindow* window, int w, int h) {
-            glViewport(0, 0, w, h);
-        }
+        static void windowSizeCallback (GLFWwindow* window, int w, int h) {
+            Window* windowObj = glfwGetWindowUserPointer(window);
+            if (windowObj->isViewportFull) {
+                glViewport(0, 0, w, h);
+            } else {
+                GLfloat widthFactor = (GLfloat)w / (GLfloat)windowObj->default_window_width;
+                GLfloat heightFactor = (GLfloat)h / (GLfloat)windowObj->default_window_height;
 
-        static void windowSizeCallback_ViewportNotFull (GLFWwindow* window, int w, int h) {
-            GLfloat widthFactor = (GLfloat)w / (GLfloat)default_window_width;
-            GLfloat heightFactor = (GLfloat)h / (GLfloat)default_window_height;
+                GLfloat sizeFactor = widthFactor < heightFactor ? widthFactor : heightFactor;
 
-            GLfloat sizeFactor = widthFactor < heightFactor ? widthFactor : heightFactor;
+                GLint modifiedWidth =  (int) ceil(windowObj->default_window_width * sizeFactor) + 1;
+                GLint modifiedHeight = (int) ceil(windowObj->default_window_height * sizeFactor) + 1;
 
-            GLint modifiedWidth =  (int) ceil(default_window_width * sizeFactor) + 1;
-            GLint modifiedHeight = (int) ceil(default_window_height * sizeFactor) + 1;
-
-            glViewport((int)floor((w - modifiedWidth) / 2.0), (int)floor((h - modifiedHeight) / 2.0), modifiedWidth, modifiedHeight);
+                glViewport((int)floor((w - modifiedWidth) / 2.0), (int)floor((h - modifiedHeight) / 2.0), modifiedWidth, modifiedHeight);
+            }
         }
 
         static int gl_version_major;
@@ -219,6 +220,8 @@ namespace yunikEngine {
 
         int default_window_width = 1024;
         int default_window_height = 768;
+
+        bool isViewportFull = false;
 
         GLFWwindow* window = nullptr;
         Scene* scene = nullptr;
