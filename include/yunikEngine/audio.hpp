@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdio>
-#include <al.h>
-#include <alc.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 namespace yunikEngine {
     class Audio {
