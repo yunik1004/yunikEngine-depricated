@@ -117,6 +117,10 @@ namespace yunikEngine {
                 fprintf(stderr, "Error: WAV file is not WAVE\n");
                 return false;
             }
+            if (fread(type, sizeof(char), 4, fp) != 4 || strcmp(type, "fmt ") != 0) {
+                fprintf(stderr, "Error: WAV file is not fmt");
+                return false;
+            }
             fread(&chunkSize, sizeof(unsigned int), 1, fp);
             fread(&formatType, sizeof(short), 1, fp);
             fread(&channels, sizeof(short), 1, fp);
@@ -126,6 +130,7 @@ namespace yunikEngine {
             fread(&bitsPerSample, sizeof(short), 1, fp);
             if (fread(type, sizeof(char), 4, fp) != 4 || strcmp(type, "data") != 0) {
                 fprintf(stderr, "Error: Missing data at WAV file\n");
+                return false;
             }
             fread(&dataSize, sizeof(unsigned int), 1, fp);
 
