@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdio>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "math.hpp"
@@ -10,6 +11,47 @@ namespace yunikEngine {
     class Window {
         /***************************** PUBLIC *********************************/
         public:
+        static void setGLVersion (int major, int minor) {
+            gl_version_major = major;
+            gl_version_minor = minor;
+        }
+
+        static void getGLVersion (int* major, int* minor) {
+            *major = gl_version_major;
+            *minor = gl_version_minor;
+        }
+
+        static void getMonitorSize (int* width, int* height) {
+            auto mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            *width = mode->width;
+            *height = mode->height;
+        }
+
+        static bool init (void) {
+            /* Initialize glfw */
+            glfwSetErrorCallback([](int errorCode, const char* errorDescription) {
+                fprintf(stderr, "GLFW Error: %s\n", errorDescription);
+            });
+
+            if (!glfwInit()) {
+                fprintf(stderr, "GLFW Error: Failed to initialize\n");
+                return false;
+            }
+
+            /* OpenGL version */
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, gl_version_major);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, gl_version_minor);
+
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+            return true;
+        }
+
+        static void deinit (void) {
+            glfwTerminate();
+        }
+
         static Window* create (void) {
             auto newWindow = new Window();
             if (!newWindow->isValid) {
@@ -125,9 +167,16 @@ namespace yunikEngine {
             }
         }
 
+        static int gl_version_major;
+        static int gl_version_minor;
+
         GLFWwindow* window = nullptr;
         Scene* scene = nullptr;
 
         bool isValid = false;
     };
+
+    /************************** INITIALIZATION ********************************/
+    int Window::gl_version_major = 4;
+    int Window::gl_version_minor = 4;
 }
