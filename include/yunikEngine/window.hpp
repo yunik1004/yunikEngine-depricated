@@ -111,6 +111,7 @@ namespace yunikEngine {
 
         void render (void) {
             while (!glfwWindowShouldClose(window)) {
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 updateScene();
                 glfwSwapBuffers(window);
                 glfwPollEvents();
@@ -141,6 +142,9 @@ namespace yunikEngine {
             setPos(round(window_width_diff / 2.0), round(window_height_diff / 2.0));
 
             glfwMakeContextCurrent(window);
+
+            /* Set background color */
+            glClearColor(0.0, 0.0, 0.0, 1.0);
 
             /* Save info about window */
             glfwSetWindowUserPointer(window, this);
