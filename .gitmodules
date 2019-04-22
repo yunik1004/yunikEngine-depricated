@@ -10,3 +10,6 @@
 [submodule "submodules/openal"]
 	path = submodules/openal
 	url = https://github.com/kcat/openal-soft.git
+[submodule "submodules/glm"]
+	path = submodules/glm
+	url = https://github.com/g-truc/glm.git

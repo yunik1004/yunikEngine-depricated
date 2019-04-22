@@ -4,6 +4,7 @@
 #include <cstring>
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <glm/glm.hpp>
 
 namespace yunikEngine {
     class Audio {
@@ -23,12 +24,63 @@ namespace yunikEngine {
                 alcCloseDevice(device);
                 return false;
             }
+
+            setListenerPos(glm::vec3(0.0, 0.0, 0.0));
+            setListenerVel(glm::vec3(0.0, 0.0, 0.0));
+            setListenerOri(glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, 1.0, 0.0));
+
+            return true;
         }
 
         static void deinit (void) {
             alcMakeContextCurrent(nullptr);
-            alcDestroyContext(context);
-            alcCloseDevice(device);
+            if (context) {
+                alcDestroyContext(context);
+            }
+            if (device) {
+                alcCloseDevice(device);
+            }
+        }
+
+        static void setListenerPos (glm::vec3 pos) {
+            ALfloat position[] = {pos.x, pos.y, pos.z};
+            alListenerfv(AL_POSITION, position);
+        }
+
+        static void setListenerVel (glm::vec3 vel) {
+            ALfloat velocity[] = {vel.x, vel.y, vel.z};
+            alListenerfv(AL_VELOCITY, velocity);
+        }
+
+        static void setListenerOri (glm::vec3 at, glm::vec3 up) {
+            ALfloat ori[] = {at.x, at.y, at.z, up.x, up.y, up.z};
+            alListenerfv(AL_ORIENTATION, ori);
+        }
+
+        void setSourcePitch (float pitch) {
+            alSourcef(source, AL_PITCH, pitch);
+        }
+
+        void setSourceGain (float gain) {
+            alSourcef(source, AL_GAIN, gain);
+        }
+
+        void setSourcePos (glm::vec3 pos) {
+            ALfloat position[] = {pos.x, pos.y, pos.z};
+            alSourcefv(source, AL_POSITION, position);
+        }
+
+        void setSourceVel (glm::vec3 vel) {
+            ALfloat velocity[] = {vel.x, vel.y, vel.z};
+            alSourcefv(source, AL_VELOCITY, velocity);
+        }
+
+        void setSourceLooping (bool isLooping) {
+            alSourcei(source, AL_LOOPING, isLooping);
+        }
+
+        void setSourceRelative (bool isRelative) {
+            alSourcei(source, AL_SOURCE_RELATIVE, isRelative);
         }
 
         static Audio* create (void) {
@@ -80,7 +132,7 @@ namespace yunikEngine {
             if (buf) {
                 delete[] buf;
             }
-            
+
             buf = new unsigned char[dataSize];
             fread(buf, sizeof(unsigned char), dataSize, fp);
 
@@ -89,6 +141,24 @@ namespace yunikEngine {
                 return false;
             }
 
+            return true;
+        }
+
+        bool play (void) {
+            alSourcePlay(source);
+            if (alGetError() != AL_NO_ERROR) {
+                fprintf(stderr, "OpenAL Error: Cannot play sound\n");
+                return false;
+            }
+            return true;
+        }
+
+        bool stop (void) {
+            alSourceStop(source);
+            if (alGetError() != AL_NO_ERROR) {
+                fprintf(stderr, "OpenAL Error: Cannot stop sound\n");
+                return false;
+            }
             return true;
         }
 
@@ -106,6 +176,12 @@ namespace yunikEngine {
         }
 
         ~Audio (void) {
+            if (source) {
+                alDeleteSources(1, &source);
+            }
+            if (buffer) {
+                alDeleteBuffers(1, &buffer);
+            }
             delete[] buf;
         }
 
@@ -135,6 +211,13 @@ namespace yunikEngine {
                 fprintf(stderr, "OpenAL Error: Error loading ALBuffer\n");
                 return false;
             }
+
+            alSourcei(source, AL_BUFFER, buffer);
+            setSourceRelative(true);
+            setSourcePos(glm::vec3(0.0, 0.0, 0.0));
+            setSourceVel(glm::vec3(0.0, 0.0, 0.0));
+
+            return true;
         }
 
         bool isValid = false;
