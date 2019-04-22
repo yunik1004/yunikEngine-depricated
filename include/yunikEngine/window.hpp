@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <cmath>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "math.hpp"
@@ -45,6 +46,9 @@ namespace yunikEngine {
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
+            /* Anti-aliasing */
+            glfwWindowHint(GLFW_SAMPLES, 4);
+
             return true;
         }
 
@@ -69,7 +73,13 @@ namespace yunikEngine {
             glfwSetWindowTitle(window, title);
         }
 
+        void getSize (int* width, int* height) {
+            glfwGetWindowSize(window, width, height);
+        }
+
         void setSize (int width, int height) {
+            default_window_width = width;
+            default_window_height = height;
             glfwSetWindowSize(window, width, height);
         }
 
@@ -79,6 +89,22 @@ namespace yunikEngine {
 
         void setResizability (bool isResizable) {
             glfwSetWindowAttrib(window, GLFW_RESIZABLE, isResizable);
+        }
+
+        void setAspectRatio (int w, int h) {
+            glfwSetWindowAspectRatio(window, w, h);
+        }
+
+        void disableAspectRatio (void) {
+            glfwSetWindowAspectRatio(window, GLFW_DONT_CARE, GLFW_DONT_CARE);
+        }
+
+        void setViewportFullWindow (bool isViewportFull) {
+            if (isViewportFull) {
+                glfwSetWindowSizeCallback(window, &windowSizeCallback_ViewportFull);
+            } else {
+                glfwSetWindowSizeCallback(window, &windowSizeCallback_ViewportNotFull);
+            }
         }
 
         void setScene (Scene* newScene) {
@@ -99,13 +125,7 @@ namespace yunikEngine {
         /**************************** PRIVATE *********************************/
         private:
         Window (void) {
-            /* Anti-aliasing */
-            glfwWindowHint(GLFW_SAMPLES, 4);
-
             /* Create window */
-            int default_window_width = 1024;
-            int default_window_height = 768;
-
             window = glfwCreateWindow(default_window_width, default_window_height, "Hello world", nullptr, nullptr);
             if (window == nullptr) {
                 fprintf(stderr, "GLFW Error: Failed to create window\n");
@@ -115,6 +135,10 @@ namespace yunikEngine {
             /* Resizability */
             setResizability(false);
 
+            /* Set Aspect ratio */
+            setAspectRatio(default_window_width, default_window_height);
+
+            /* Set window position */
             int monitor_width, monitor_height;
             getMonitorSize(&monitor_width, &monitor_height);
 			const auto window_width_diff = monitor_width - default_window_width;
@@ -125,6 +149,9 @@ namespace yunikEngine {
 
             /* FPS limit: 60 */
             glfwSwapInterval(1);
+
+            /* Viewport setting & Window size change callback */
+            setViewportFullWindow(false);
 
             /* Initialize glew */
             GLenum errorCode = glewInit();
@@ -171,8 +198,27 @@ namespace yunikEngine {
             }
         }
 
+        static void windowSizeCallback_ViewportFull (GLFWwindow* window, int w, int h) {
+            glViewport(0, 0, w, h);
+        }
+
+        static void windowSizeCallback_ViewportNotFull (GLFWwindow* window, int w, int h) {
+            GLfloat widthFactor = (GLfloat)w / (GLfloat)default_window_width;
+            GLfloat heightFactor = (GLfloat)h / (GLfloat)default_window_height;
+
+            GLfloat sizeFactor = widthFactor < heightFactor ? widthFactor : heightFactor;
+
+            GLint modifiedWidth =  (int) ceil(default_window_width * sizeFactor) + 1;
+            GLint modifiedHeight = (int) ceil(default_window_height * sizeFactor) + 1;
+
+            glViewport((int)floor((w - modifiedWidth) / 2.0), (int)floor((h - modifiedHeight) / 2.0), modifiedWidth, modifiedHeight);
+        }
+
         static int gl_version_major;
         static int gl_version_minor;
+
+        int default_window_width = 1024;
+        int default_window_height = 768;
 
         GLFWwindow* window = nullptr;
         Scene* scene = nullptr;
