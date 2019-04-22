@@ -100,7 +100,6 @@ namespace yunikEngine {
 
         void setViewportFullWindow (bool isFull) {
             isViewportFull = isFull;
-            glfwSetWindowSizeCallback(window, &windowSizeCallback);
         }
 
         void setScene (Scene* newScene) {
@@ -149,8 +148,11 @@ namespace yunikEngine {
             /* FPS limit: 60 */
             glfwSwapInterval(1);
 
-            /* Viewport setting & Window size change callback */
+            /* Viewport setting */
             setViewportFullWindow(false);
+
+            /* Window size change callback */
+            glfwSetWindowSizeCallback(window, &windowSizeCallback);
 
             /* Initialize glew */
             GLenum errorCode = glewInit();
