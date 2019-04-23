@@ -21,6 +21,12 @@ namespace yunikEngine {
             *minor = gl_version_minor;
         }
 
+        static char* getGLSLCore (void) {
+            char* glsl_core = new char[19];
+            sprintf(glsl_core, "#version %d%d0 core\n", gl_version_major, gl_version_minor);
+            return glsl_core;
+        }
+
         static void getMonitorSize (int* width, int* height) {
             auto mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
             *width = mode->width;
@@ -169,7 +175,7 @@ namespace yunikEngine {
             /* OpenGL version check */
             int gl_major, gl_minor;
             getGLVersion(&gl_major, &gl_minor);
-            char gl_version[17];
+            char gl_version[15];
             sprintf(gl_version, "GL_VERSION_%d_%d", gl_major, gl_minor);
             if (!glewIsSupported(gl_version)) {
                 fprintf(stderr, "OpenGL Error: %s is not available\n", gl_version);

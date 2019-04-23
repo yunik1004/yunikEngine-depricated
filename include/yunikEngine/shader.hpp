@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdio>
+#include <string>
 #include <GL/glew.h>
+#include "window.hpp"
 
 namespace yunikEngine {
     /**************************************************************************/
@@ -146,4 +148,46 @@ namespace yunikEngine {
 
         bool isValid = false;
     };
+
+    /**************************************************************************/
+    /*                            Shader examples                             */
+    /**************************************************************************/
+    namespace example {
+        char* simpleVertexShader (void) {
+            char* glslCore = Window::getGLSLCore();
+            std::string code = "\
+                layout (location = 0) in vec3 vertex;\
+                \
+                uniform mat4 aModel_view;\
+                uniform mat4 aProjection;\
+                \
+                void main (void) {\
+                    gl_Position = aProjection * aModel_view * vec4(vertex, 1.0);\
+                }\
+            ";
+            std::string shader_str = std::string(glslCore) + code;
+            delete glslCore;
+            int shaderSize = shader_str.size();
+            char* shader = new char[shaderSize + 1];
+            strcpy_s(shader, shaderSize + 1, shader_str.c_str());
+            return shader;
+        }
+
+        char* simpleFragmentShader (void) {
+            char* glslCore = Window::getGLSLCore();
+            std::string code = "\
+                out vec3 color;\
+                \
+                void main (void) {\
+                    color = vec3(1.0, 1.0, 1.0);\
+                }\
+            ";
+            std::string shader_str = std::string(glslCore) + code;
+            delete glslCore;
+            int shaderSize = shader_str.size();
+            char* shader = new char[shaderSize + 1];
+            strcpy_s(shader, shaderSize + 1, shader_str.c_str());
+            return shader;
+        }
+    }
 }
