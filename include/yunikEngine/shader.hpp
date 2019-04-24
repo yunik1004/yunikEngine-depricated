@@ -156,13 +156,24 @@ namespace yunikEngine {
         char* simpleVertexShader (void) {
             char* glslCore = Window::getGLSLCore();
             std::string code = "\
-                layout (location = 0) in vec3 vertex;\
+                uniform mat4 uModelViewMatrix;\
+                uniform mat4 uNormalMatrix;\
+                uniform mat4 uProjMatrix;\
                 \
-                uniform mat4 aModel_view;\
-                uniform mat4 aProjection;\
+                in vec3 aColor;\
+                in vec3 aNormal;\
+                in vec3 aVertex;\
+                \
+                out vec3 vColor;\
+                out vec3 vNormal;\
+                out vec4 vPosition;\
                 \
                 void main (void) {\
-                    gl_Position = aProjection * aModel_view * vec4(vertex, 1.0);\
+                    vColor = aColor;\
+                    vPosition = uModelViewMatrix * vec4(aVertex, 1.0);\
+                    vec4 normal = vec4(aNormal, 0.0);\
+                    vNormal = vec3(uNormalMatrix * normal);\
+                    gl_Position = uProjMatrix * vPosition;\
                 }\
             ";
             std::string shader_str = std::string(glslCore) + code;
@@ -176,10 +187,14 @@ namespace yunikEngine {
         char* simpleFragmentShader (void) {
             char* glslCore = Window::getGLSLCore();
             std::string code = "\
-                out vec3 color;\
+                in vec3 vColor;\
+                in vec3 vNormal;\
+                in vec4 vPosition;\
+                \
+                out vec4 fragColor;\
                 \
                 void main (void) {\
-                    color = vec3(1.0, 1.0, 1.0);\
+                    fragColor = vec4(vColor, 1.0);\
                 }\
             ";
             std::string shader_str = std::string(glslCore) + code;
