@@ -48,6 +48,14 @@ namespace yunikEngine {
             viewMatrix = glm::lookAt(pos, at, up);
         }
 
+        glm::mat4 getViewMatrix (void) {
+            return viewMatrix;
+        }
+
+        glm::mat4 getProjMatrix (void) {
+            return projMatrix;
+        }
+
         /**************************** PRIVATE *********************************/
         private:
         Camera (bool isOrtho, float width, float height) {
