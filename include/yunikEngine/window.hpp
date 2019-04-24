@@ -82,6 +82,11 @@ namespace yunikEngine {
             glfwGetWindowSize(window, width, height);
         }
 
+        void getDefaultSize (int* width, int* height) {
+            *width = default_window_width;
+            *height = default_window_height;
+        }
+
         void setSize (int width, int height) {
             default_window_width = width;
             default_window_height = height;
